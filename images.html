@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+
+<html lang = "en">
+<head>
+   
+</head>
+
+<body>
+	<video id="video" width="640" height="480" autoplay></video>
+	<img id="image" src=""></img>
+	<button id="snap">Snap Photo</button>
+	<canvas id="canvas" width="640" height="480"></canvas>
+	
+	<script src="jquery-2.1.4.min.js"></script>
+
+	 <script>
+	 	console.log("start");
+		window.addEventListener("DOMContentLoaded", function() {
+
+		var canvas = document.getElementById("canvas"),
+			context = canvas.getContext("2d"),
+			video = document.getElementById("video"),
+			videoObj = { "video": true },
+			snapPhoto = document.getElementById("snap"),
+			img = document.getElementById("image"),
+			errBack = function(error) {
+				console.log("Video capture error: ", error.code); 
+			};
+			ackBack = function(succes){
+				console.log("OK!", succes.code);
+			};
+			navigator.getUserMedia = (navigator.getUserMedia || 
+	            navigator.webkitGetUserMedia || /* Chrome & Chromium */
+	            navigator.mozGetUserMedia || 
+	            navigator.msGetUserMedia);
+
+			if(navigator.getUserMedia){
+
+				navigator.getUserMedia(
+				{
+					video:true,
+					audio:false
+				}, 
+				function(stream){
+					video.src = window.URL.createObjectURL(stream);
+					video.play();
+				},errBack);
+			}
+			
+			document.getElementById("snap").addEventListener("click", function(){
+				console.log('i paused the video. take snapshot and display it into the image div!');
+				context.drawImage(video, 0,0, canvas.width, canvas.height);
+				var dataURL = canvas.toDataURL();
+				$.ajaxSetup({
+					headers:{"LicenseKey": "RYqEt22EvImsh4m9XgZ8fL2Yfsbcp1bJ9ChjsnT0smNcQdHg9n",
+					"X-Mashape-Key": "RYqEt22EvImsh4m9XgZ8fL2Yfsbcp1bJ9ChjsnT0smNcQdHg9n"
+					}
+				})
+				$.ajax({type: "POST", data: dataURL, url: 'https://faceplusplus-faceplusplus.p.mashape.com/detection/detect', succes: ackBack, error: errBack});
+			});
+			
+		});
+	</script>
+</body>
+</html>
